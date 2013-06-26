@@ -2,7 +2,7 @@
 \alias{getCompendium}
 \title{This method allows to download/import the full compendium for the selected organism}
 \usage{
-  getCompendium(organism = "ecoli", path = NULL)
+  getCompendium(organism = "hpylo", path = NULL)
 }
 \arguments{
   \item{organism}{A character containing the organism id:
@@ -13,8 +13,11 @@
   will be either downloaded or read, if already retrieved}
 }
 \value{
-  A data.frame containing the full compendium for the
-  selected organism.
+  A list containing three data.frame: \item{exprdata}{the
+  full compendium for the selected organism}
+  \item{condannot}{The condition annotation for the
+  selected organism} \item{condontol}{the condition
+  ontology for the selected organism}
 }
 \description{
   This method allows to download/import the full compendium
@@ -23,7 +26,7 @@
 \examples{
 \dontrun{
 library('Rcolombos')
-mtube <- getCompendium("mtube")
+hpylo <- getCompendium("hpylo")
 }
 }
 \references{
