@@ -1,3 +1,4 @@
+export(getCompendium)
 export(listContrasts)
 export(listGenes)
 export(listOrganisms)
