@@ -1,7 +1,7 @@
 Package: Rcolombos
 Type: Package
 Title: Interface to Colombos Compendia using the exposed REST API
-Version: 1.4.1
+Version: 1.4.3
 Date: 2013-06-26
 Author: Paolo Sonego <paolo.sonego@fmach.it>
 Maintainer: Paolo Sonego <paolo.sonego@fmach.it>
@@ -13,6 +13,6 @@ Depends: RCurl, RJSONIO
 Repository: CRAN
 URL: http://colombos.net/
 Collate: 'Rcolombos.R' 'utilities.R' 'zzz.R'
-Packaged: 2013-11-21 13:31:06 UTC; paolo
+Packaged: 2014-02-03 08:19:41 UTC; paolo
 NeedsCompilation: no
-Date/Publication: 2013-11-21 16:12:11
+Date/Publication: 2014-02-03 10:32:56
