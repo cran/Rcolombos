@@ -26,37 +26,18 @@
 #' }
 #'
 quick_search <- function(organism="ecoli", genes, geneNames=FALSE){
-  if(is.null(genes)) stop("Insert a character vector with the genes to be imputed.") else {}
-  #
-  t <- basicTextGatherer()
-  h <- basicHeaderGatherer()
-  curlPerform( url = paste("http://rest.colombos.net/rest/quick_search/", 
-                           organism, paste(genes, collapse=","), sep="/"),
-               .opts = list(httpheader = c('Content-Type' = "application/json"), verbose = FALSE),
-               curl = getCurlHandle(),
-               writefunction = t$update,
-               headerfunction = h$update
-  ) 
-  
-  output <- list(data = t$value(),
-                 status = h$value()[['status']],
-                 status.message = h$value()[['statusMessage']])
-  httpstatus <- as.numeric(output$status)
-  if (httpstatus != 200) {
-    return(output$status.message)
-  }  else {
-      tmp <- fromJSON(output$data, nullValue = NA)$data;
-      if (geneNames){
-        response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                   nrow=length(tmp$geneNames), ncol=length(tmp$contrasts), byrow=T)))
-        colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneNames
-      } else {
-        response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                   nrow=length(tmp$geneLocustags), ncol=length(tmp$contrasts), byrow=T)) )
-        colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneLocustags
-      }
-      return(response)
-  }
+    if(is.null(genes)) stop("Insert a character vector with the genes to be imputed.") else {}
+    r <- GET("http://rest.colombos.net/", path = paste("quick_search",organism, paste(genes, collapse=","), sep="/"))
+    if (r$headers$status != 200) {
+        stop_for_status(r)
+    } else {
+        tmp <- content(r)
+        response = suppressWarnings( data.frame(matrix(as.numeric(tmp$data$Mvalues), 
+        nrow=length(tmp$data$geneLocustags), ncol=length(tmp$data$contrasts), byrow=T)) )
+        colnames(response) <- tmp$data$contrasts; rownames(response) <- tmp$data$geneLocustags
+        if (geneNames) rownames(response) <- tmp$data$geneNames
+        return(response)
+    }
 }
 #' This method mimics the advanced_search functionality of Colombos.
 #' It takes a series of parameters, representing the different settings available on Colombos advanced search
@@ -153,8 +134,6 @@ advanced_search <- function(organism=NULL, g_ids=NULL, geneNames=FALSE, c_ids, b
 #'
 advanced_search_by_genes <- function(organism="bsubt", ids=NULL, geneNames=FALSE, g_search_type="genes", ann_type){
     if(is.null(ids)) stop("Insert the ids for the specific search_type.") else {}
-    t <- basicTextGatherer()
-    h <- basicHeaderGatherer()
     if(g_search_type=="genes"){
         url_string <- paste("http://rest.colombos.net/advanced_search_by_genes", organism, "genes", paste(ids, collapse=","), sep="/")
     }
@@ -167,29 +146,15 @@ advanced_search_by_genes <- function(organism="bsubt", ids=NULL, geneNames=FALSE
     } else {
         stop("Wrong search_type: it should be either genes, go or annotation!")
     }
-    curlPerform( url = url_string,
-                 .opts = list(httpheader = c('Content-Type' = "application/json"), verbose = FALSE),
-                 curl = getCurlHandle(),
-                 writefunction = t$update,
-                 headerfunction = h$update
-    ) 
-    output <- list(data = t$value(),
-                   status = h$value()[['status']],
-                   status.message = h$value()[['statusMessage']])
-    httpstatus <- as.numeric(output$status)
-    if (httpstatus != 200) {
-        return(output$status.message)
-    }  else {
-        tmp <- fromJSON(output$data, nullValue = NA)$data;
-        if (geneNames){
-            response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                                                           nrow=length(tmp$geneNames), ncol=length(tmp$contrasts), byrow=T)))
-            colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneNames
-        } else {
-            response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                                                           nrow=length(tmp$geneLocustags), ncol=length(tmp$contrasts), byrow=T)) )
-            colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneLocustags
-        }
+    r <- GET(url_string)
+    if (r$headers$status != 200) {
+        stop_for_status(r)
+    } else {
+        tmp <- content(r)
+        response = suppressWarnings( data.frame(matrix(as.numeric(tmp$data$Mvalues), 
+        nrow=length(tmp$data$geneLocustags), ncol=length(tmp$data$contrasts), byrow=T)) )
+        colnames(response) <- tmp$data$contrasts; rownames(response) <- tmp$data$geneLocustags       
+        if (geneNames) rownames(response) <- tmp$data$geneNames
         return(response)
     }
 }
@@ -208,56 +173,34 @@ advanced_search_by_genes <- function(organism="bsubt", ids=NULL, geneNames=FALSE
 #'
 #' @export
 #' 
-#' @examples
-#' \dontrun{
-#' c.cn <- advanced_search_by_contrasts(organism="bsubt", 
-#' ids=c("GSM27217.ch2-vs-GSM27217.ch1","GSM27218.ch1-vs-GSM27218.ch2"), search_type="contrast_names")
-#' }
-#' 
 advanced_search_by_contrasts <- function(organism=NULL, ids=NULL, geneNames=FALSE, c_search_type=NULL){
     if(is.null(ids)) stop("Insert the ids for the specific search_type.") else {}
-    t <- basicTextGatherer()
-    h <- basicHeaderGatherer()
     if(c_search_type=="contrast_names"){
         url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "contrast_names", paste(ids, collapse=","), sep="/")
     }
     else if(c_search_type=="experiment"){
-# url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "experiment", paste(gsub(" ","%20", ids), collapse=","), sep="/")
+        # url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "experiment", paste(gsub(" ","%20", ids), collapse=","), sep="/")
         url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "experiment", gsub(" ","%20", ids), sep="/")
     }
     else if(c_search_type=="go"){
-# url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "go", paste(gsub(" ","%20", ids), collapse=","), sep="/")
+        # url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "go", paste(gsub(" ","%20", ids), collapse=","), sep="/")
         url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "go", gsub(" ","%20", ids), sep="/")
     }
     else if(c_search_type=="condition"){
-# url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "condition", paste(gsub(" ","%20", ids), collapse=","), sep="/")
+        # url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "condition", paste(gsub(" ","%20", ids), collapse=","), sep="/")
         url_string <- paste("http://rest.colombos.net/advanced_search_by_contrast", organism, "condition", paste(ids, collapse=","), sep="/")
     } else {
         stop("Wrong search_type: it should be either contrast_names, experiment, go or condition!")
     }
-    curlPerform( url = url_string,
-                 .opts = list(httpheader = c('Content-Type' = "application/json"), verbose = FALSE),
-                 curl = getCurlHandle(),
-                 writefunction = t$update,
-                 headerfunction = h$update
-    ) 
-    output <- list(data = t$value(),
-                   status = h$value()[['status']],
-                   status.message = h$value()[['statusMessage']])
-    httpstatus <- as.numeric(output$status)
-    if (httpstatus != 200) {
-        return(output$status.message)
-    }  else {
-        tmp <- fromJSON(output$data, nullValue = NA)$data;
-        if (geneNames){
-            response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                                                           nrow=length(tmp$geneNames), ncol=length(tmp$contrasts), byrow=T)))
-            colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneNames
-        } else {
-            response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                                                           nrow=length(tmp$geneLocustags), ncol=length(tmp$contrasts), byrow=T)) )
-            colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneLocustags
-        }
+    r <- GET(url_string)
+    if (r$headers$status != 200) {
+        stop_for_status(r)
+    } else {
+        tmp <- content(r)
+        response = suppressWarnings( data.frame(matrix(as.numeric(sapply(tmp$data$Mvalues, as.character)), 
+        nrow=length(tmp$data$geneLocustags), ncol=length(tmp$data$contrasts), byrow=T)) )
+        colnames(response) <- tmp$data$contrasts; rownames(response) <- tmp$data$geneLocustags
+        if (geneNames) rownames(response) <- tmp$data$geneNames
         return(response)
     }
 }
@@ -279,17 +222,9 @@ advanced_search_by_contrasts <- function(organism=NULL, ids=NULL, geneNames=FALS
 #'
 #' @export
 #' 
-#' @examples
-#' \dontrun{
-#' c.cn <- advanced_search_by_contrasts(organism="bsubt", 
-#' ids=c("GSM27217.ch2-vs-GSM27217.ch1","GSM27218.ch1-vs-GSM27218.ch2"), search_type="contrast_names")
-#' }
-#' 
 advanced_search_by_both <- function(organism, g_ids, geneNames, c_ids, g_search_type, ann_type, c_search_type){
     if(is.null(g_ids)) stop("Insert a character vector with the g_ids to be imputed.") else {}
     if(is.null(c_ids)) stop("Insert a character vector with the c_ids to be imputed.") else {}
-    t <- basicTextGatherer()
-    h <- basicHeaderGatherer()
     base_url <- "http://rest.colombos.net/advanced_search_by_both"
     if(g_search_type=="genes"){
         g_string <- paste(base_url, organism, "genes", paste(g_ids, collapse=","), sep="/")
@@ -299,11 +234,11 @@ advanced_search_by_both <- function(organism, g_ids, geneNames, c_ids, g_search_
     }
     else if(g_search_type=="annotation"){
         g_string <- paste(base_url, organism, "annotation", gsub(" ","%20", ann_type), 
-                            gsub(" ","%20", g_ids), sep="/")  
+                          gsub(" ","%20", g_ids), sep="/")  
     } else {
         stop("Wrong search_type: it should be either genes, go or annotation!")
     }
-#
+    #
     if(c_search_type=="contrast_names"){
         url_string <- paste(g_string, "contrast_names", paste(c_ids, collapse=","), sep="/")
     }
@@ -321,29 +256,15 @@ advanced_search_by_both <- function(organism, g_ids, geneNames, c_ids, g_search_
     } else {
         stop("Wrong search_type: it should be either contrast_names, experiment, go or condition!")
     }
-    curlPerform( url = url_string,
-                 .opts = list(httpheader = c('Content-Type' = "application/json"), verbose = FALSE),
-                 curl = getCurlHandle(),
-                 writefunction = t$update,
-                 headerfunction = h$update
-    ) 
-    output <- list(data = t$value(),
-                   status = h$value()[['status']],
-                   status.message = h$value()[['statusMessage']])
-    httpstatus <- as.numeric(output$status)
-    if (httpstatus != 200) {
-        return(output$status.message)
-    }  else {
-        tmp <- fromJSON(output$data, nullValue = NA)$data;
-        if (geneNames){
-            response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                                                           nrow=length(tmp$geneNames), ncol=length(tmp$contrasts), byrow=T)))
-            colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneNames
-        } else {
-            response = suppressWarnings( data.frame(matrix(as.numeric(tmp$Mvalues), 
-                                                           nrow=length(tmp$geneLocustags), ncol=length(tmp$contrasts), byrow=T)) )
-            colnames(response) <- tmp$contrasts; rownames(response) <- tmp$geneLocustags
-        }
+    r <- GET(url_string)
+    if (r$headers$status != 200) {
+        stop_for_status(r)
+    } else {
+        tmp <- content(r)
+        response = suppressWarnings( data.frame(matrix(as.numeric(sapply(tmp$data$Mvalues, as.character)), 
+        nrow=length(tmp$data$geneLocustags), ncol=length(tmp$data$contrasts), byrow=T)) )
+        colnames(response) <- tmp$data$contrasts; rownames(response) <- tmp$data$geneLocustags
+        if (geneNames) rownames(response) <- tmp$data$geneNames
         return(response)
     }
 }
