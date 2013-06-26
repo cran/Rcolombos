@@ -149,12 +149,12 @@ listContrasts <- function(organism="ecoli"){
 #' @examples
 #' \dontrun{
 #' library('Rcolombos')
-#' getCompendium()
+#' mtube <- getCompendium("mtube")
 #' }
 #'
 getCompendium <- function(organism="ecoli", path=NULL){
   if(is.null(path)) path <- getwd() else {}
-    destfile <- paste(path,"/",organism, "_compendium_data.txt.gz",sep="")
+    destfile <- paste(path,"/",organism, "_compendium_data.txt.zip",sep="")
     header.field = c('Content-Type' = "application/json")
     curl <- getCurlHandle() 
     curlSetOpt(.opts = list(httpheader = header.field, verbose = FALSE), curl = curl) 
@@ -174,12 +174,10 @@ getCompendium <- function(organism="ecoli", path=NULL){
       if(!file.exists(destfile)){
         tmp <- fromJSON(output$data, nullValue = NA)$data;
         download.file( tmp, destfile )
-#       return(tmp)
       } else {}
-    ## TO.DO create a ExpressionSet object take care of all contrasts and genes info
-    my_cols <- scan(destfile, what="c", nlines=1)
-    out <- read.csv(destfile, row.names=1,
-                    skip=7, stringsAsFactors=FALSE, sep="\t")
+    temp <- unz(destfile, paste(organism, "_compendium_data.txt",sep=""))
+    my_cols <- na.omit(scan(temp, nlines=1, sep="\t", what="c", na.strings="", quiet=TRUE))
+    out <- read.csv(temp, row.names=1, skip=7, stringsAsFactors=FALSE, sep="\t")
     out <- out[,c(2:dim(out)[[2]])] 
     colnames(out) = my_cols; out <- out[,c(2:dim(out)[[2]])]
   }    

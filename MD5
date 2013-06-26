@@ -1,13 +1,14 @@
-d80a8696a87d1b6a255bd8b6ff22e85d *DESCRIPTION
+b5ccb7d9c4eacf9c028c08206e022e05 *DESCRIPTION
 b4845815b6c10bf15fd8db830cbad2d8 *NAMESPACE
 373a11988cdb6fec83fc76a63cee2395 *R/Rcolombos.R
-a55422d3ef524a8a5bf7bd94a08acf61 *R/utilities.R
+cfc509e9fda60518895dc43090213fe8 *R/utilities.R
 f36526331095961f92a65739915d2350 *R/zzz.R
+5aab2b6164177bfbefdf42c0143d82ff *README.md
 9063c3cc99fcc0c7f2686aecdf654d92 *man/advanced_search.Rd
 73b809919d49b3a4cfad1e31c28c4aa7 *man/advanced_search_by_both.Rd
 c09687115065fa0594c2dce06abc197e *man/advanced_search_by_contrasts.Rd
 83c1ebbf3cefb07761a6ff482576d461 *man/advanced_search_by_genes.Rd
-b9b885d2ad261cba71bdc2b696c5a6ce *man/getCompendium.Rd
+ee26ad4712169ced79743190ca9a7c3d *man/getCompendium.Rd
 d893fb2df69507fe18568e66b0cb1d7a *man/listAnnotationTypes.Rd
 b299f1d76f57f1ca70b7cc763ca12997 *man/listContrasts.Rd
 211ef7a8def2ccc190e06a00e4e39282 *man/listEntities.Rd
