@@ -1,7 +1,7 @@
-01fb542e178ae4ad31aed1b820b7941b *DESCRIPTION
-b3c6b1d43859bf521c400735fa3dff03 *NAMESPACE
-01f338315fee7d1f064b142f852e74b1 *R/Rcolombos.R
-1200a925c7a842ccbe5261e0ef3b1013 *R/utilities.R
+5048a4917c0fbcc30f54c7e0372f41bc *DESCRIPTION
+baf068e49edd52bcbfe5d96c470ba900 *NAMESPACE
+4191137969b0aafe7dfccb4b9f842fc9 *R/Rcolombos.R
+5c9bb2934eab1616345891490aead551 *R/utilities.R
 9e38f9c23350e199254712352f5eb3cd *R/zzz.R
 696bfa3aa4e4c451fa34e156a9873695 *man/advanced_search.Rd
 3cba58b9937afccb6266d3857282a4d0 *man/advanced_search_by_both.Rd
